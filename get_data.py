@@ -86,7 +86,7 @@ def get_url(code):
 		raise Exception('Failed to get url for the stock %s, Please check again', %code)
 	return url 
 
-def fetch_follows:
+def fetch_follows():
 	conn = sqlite3.connect('/data/stock.db')
 	cursor = conn.cursor()
 	for code in stock_codes:
@@ -99,4 +99,19 @@ def fetch_follows:
 	cursor.commit()
 	conn.close()
 
-def 
+def fetch_comments():
+	conn = sqlite3.connect('/data/stock.db')
+	cursor = conn.cursor()
+	for code in stock_codes:
+		url = 'http://xueqiu.com/k?q=' + code
+		page = requests.get(url, headers = headers)
+		comments = re.findall(r'<b id="searchResult" style="color:#BC2931">[0-9]*</b>条', page.text)
+	# Notice: result is like ['<b id="searchResult" style="color:#BC2931">(****)</b>条']
+		comments = int(comments[0][43:][:-5])
+		cursor.execute('insert into stock_comments values(?, ?, ?)', code, date, comments)
+	cursor.commit()
+	conn.close()
+
+def get_data():
+	fetch_follows()
+	fetch_comments()
