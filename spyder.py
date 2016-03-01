@@ -30,11 +30,12 @@ class comment_spyder:
 		self.url = self._get_url()
 		self.timestamp_list = []
 		self.headers['Referer'] = self.url
+		self.count = 0
 
 	def _get_url(self):
-		if self.code[0] in ['3', '6']:
+		if self.code[0] in ['3', '0']:
 			url = 'http://xueqiu.com/S/' + 'SZ' + self.code
-		elif self.code[0] == '0':
+		elif self.code[0] == '6':
 			url = 'http://xueqiu.com/S/' + 'SH' + self.code
 		else:
 			raise BaseException('Failed to get url for the stock %s, Please check again' %self.code)
@@ -42,13 +43,14 @@ class comment_spyder:
 	
 	def _timestamp_url(self, count):
 		return 'http://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' \
-			+ self.url[-8:] + '&h1=0&source=all&sort=alpha&page=' + str(count)
+			+ self.url[-8:] + '&h1=0&source=all&sort=time&page=' + str(count)
 
 	def _fetch_timestamp(self, count, flag = True):
 		url = self._timestamp_url(count)
 		page = requests.get(url, headers = self.headers)
 		comment = re.findall(r'"created_at":[0-9]*,', page.text)
 		if comment == []:
+			print(page.text)
 			return [], False
 		timestamp = []
 		for com in comment:
@@ -72,21 +74,33 @@ class comment_spyder:
 		'''
 		return date[:10]
 
+	def get_count(self):
+		url = self._timestamp_url(count = 1)
+		page = requests.get(url, headers = self.headers)
+		self.count = re.findall(r'"count":[0-9]*', page.text)[0][8:]
+
 	def get_time(self):
+		self.get_count()
 		count = 1
 		flag = True
 		while flag == True:
+			print(count)
 			timestamp, flag = self._fetch_timestamp(count, flag)
 			if flag == True:
 				self.timestamp_list.extend(list(map(self._handle_timestamp, timestamp)))
 			count += 1
-			print(count)
+			# print(count)
 		print(self.timestamp_list)
 
+	def _collection_name(self):
+		return 'comment'
+
 	def save_to_sql(self):
+		collection_name = self._collectioin_name()
 		client = pmg.MongoClient('localhost', 27017)
 		db = client['stock_database']
-		collection = db['comment']
+		collection = db[collection_name]
+		# db.collection.remove()
 		# post_list = []
 		for timestamp in self.timestamp_list:
 			post = {
@@ -95,6 +109,9 @@ class comment_spyder:
 			}
 			# post_list.append(post)
 			db.collection.insert_one(post)
+		collection_2 = db['count']
+		post = {'code':self.code, 'type':collection_name, 'count':self.count}
+		db.collection_2.insert_one(post)
 
 	# def incremental_update(self):
 	# 	self.get_comment_time()
@@ -114,8 +131,13 @@ class follower_spyder(comment_spyder):
 		return 'http://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' \
 		+ self.url[-8:] + '&hl=0&source=trans&page=' + str(count)
 	
+	def _collection_name(self):
+		return 'follower'
+
+
 
 if __name__ == '__main__':
-	sp = comment_spyder('000917')
+	sp = follower_spyder('000917')
 	sp.get_time()
+	print(sp.count)
 	# sp.save_to_sql()
