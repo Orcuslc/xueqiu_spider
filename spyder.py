@@ -1,6 +1,6 @@
 import requests
 import re
-# from datetime import datetime as dt
+from datetime import datetime as dt
 import time
 # import sqlite3
 import pymongo as pmg 
@@ -40,9 +40,12 @@ class comment_spyder:
 			raise BaseException('Failed to get url for the stock %s, Please check again' %self.code)
 		return url 
 	
-	def _fetch_timestamp(self, count, flag = True):
-		url = 'http://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' \
+	def _timestamp_url(self, count):
+		return 'http://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' \
 			+ self.url[-8:] + '&h1=0&source=all&sort=alpha&page=' + str(count)
+
+	def _fetch_timestamp(self, count, flag = True):
+		url = self._timestamp_url(count)
 		page = requests.get(url, headers = self.headers)
 		comment = re.findall(r'"created_at":[0-9]*,', page.text)
 		if comment == []:
@@ -69,7 +72,7 @@ class comment_spyder:
 		'''
 		return date[:10]
 
-	def get_comment_time(self):
+	def get_time(self):
 		count = 1
 		flag = True
 		while flag == True:
@@ -77,7 +80,8 @@ class comment_spyder:
 			if flag == True:
 				self.timestamp_list.extend(list(map(self._handle_timestamp, timestamp)))
 			count += 1
-		# return timestamp_list
+			print(count)
+		print(self.timestamp_list)
 
 	def save_to_sql(self):
 		client = pmg.MongoClient('localhost', 27017)
@@ -92,12 +96,26 @@ class comment_spyder:
 			# post_list.append(post)
 			db.collection.insert_one(post)
 
-	def incremental_update(self):
-		
+	# def incremental_update(self):
+	# 	self.get_comment_time()
+	# 	today = dt.today()
+	# 	today = str(today.year) + '-' + str(today.month) + '-' + str(today.day)
+	# 	for timestamp in self.timestamp_list:
+	# 		if timestamp == today:
 
+class follower_spyder(comment_spyder):
+	'''
+	The class of follower spyder, derived from comment spyder
+	'''
+	def __init__(self, code):
+		super().__init__(code)
+
+	def _timestamp_url(self, count):
+		return 'http://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' \
+		+ self.url[-8:] + '&hl=0&source=trans&page=' + str(count)
+	
 
 if __name__ == '__main__':
 	sp = comment_spyder('000917')
-	l = sp.get_comment_time()
-	print(l)
-	sp.save_to_sql()
+	sp.get_time()
+	# sp.save_to_sql()
