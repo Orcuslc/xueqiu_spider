@@ -5,7 +5,7 @@ import sqlalchemy as sqlc
 route = 'sqlite:///data/stock.db'
 engine = sqlc.create_engine(route)
 
-def pull_stock_basics():
+def fetch_stock_basics():
 	stock_basics = pd.read_sql('SELECT * from stock_basics', engine)
 	if stock_basics.empty == True:
 		stock_basics = ts.get_stock_basics()
@@ -14,5 +14,5 @@ def pull_stock_basics():
 
 
 if __name__ == '__main__':
-	stock_basics = pull_stock_basics()
+	stock_basics = fetch_stock_basics()
 	print(stock_basics)
