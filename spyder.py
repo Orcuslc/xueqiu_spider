@@ -64,6 +64,7 @@ class comment_spyder:
 	def _fetch_timestamp(self, count, flag = True):
 		url = self._timestamp_url(count)
 		page = requests.get(url, headers = self.headers, cookies = self.cookies)
+		print(page.text)
 		comment = re.findall(r'"created_at":[0-9]*,', page.text)
 		if comment == []:
 			# print(page.text)
@@ -96,7 +97,7 @@ class comment_spyder:
 		try:
 			self.count = re.findall(r'"count":[0-9]*', page.text)[0][8:]
 		except IndexError:
-			self.get_count()
+			self.count = 0
 			
 	def get_time(self):
 		self.get_count()
@@ -161,7 +162,7 @@ class follower_spyder(comment_spyder):
 if __name__ == '__main__':
 	client = pmg.MongoClient('localhost', 27017)
 	db = client['stock_database']
-	sp = comment_spyder('000917', db)
+	sp = comment_spyder('600397', db)
 	# sp.get_time()
 	# print(sp.count)
 	sp.save_to_db()

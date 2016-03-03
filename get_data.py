@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 global db, codelist
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient()
 db = client['stock_database']
 db['comment'].remove()
 db['follower'].remove()
@@ -30,6 +30,7 @@ class spyder(threading.Thread):
 			fol_spy = follower_spyder(code, db)
 			com_spy.save_to_db()
 			fol_spy.save_to_db()
+			time.sleep(5)
 		print('%s Completed!'%self.getName())
 
 	def stop(self):
