@@ -62,9 +62,13 @@ class comment_spyder:
 			+ self.url[-8:] + '&h1=0&source=all&sort=time&page=' + str(count)
 
 	def _fetch_timestamp(self, count, flag = True):
+		print(self.code, count)
 		url = self._timestamp_url(count)
-		page = requests.get(url, headers = self.headers, cookies = self.cookies)
-		print(page.text)
+		try:
+			page = requests.get(url, headers = self.headers, cookies = self.cookies)
+		except requests.exceptions.ConnectionError:
+			return [], True
+		# print(page.text)
 		comment = re.findall(r'"created_at":[0-9]*,', page.text)
 		if comment == []:
 			# print(page.text)
@@ -164,5 +168,5 @@ if __name__ == '__main__':
 	db = client['stock_database']
 	sp = comment_spyder('600397', db)
 	# sp.get_time()
-	# print(sp.count)
+	print(sp.count)
 	sp.save_to_db()

@@ -8,10 +8,13 @@ global db, codelist
 
 client = MongoClient()
 db = client['stock_database']
+c1 = db['comment']
+c2 = db['follower']
+c3 = db['count']
 db['comment'].remove()
 db['follower'].remove()
 db['count'].remove()
-codelist = list(fetch_stock_basics()['code'])
+codelist = list(fetch_stock_basics()['code'])[:10]
 listlock = threading.RLock()
 
 class spyder(threading.Thread):
@@ -30,7 +33,7 @@ class spyder(threading.Thread):
 			fol_spy = follower_spyder(code, db)
 			com_spy.save_to_db()
 			fol_spy.save_to_db()
-			time.sleep(5)
+			time.sleep(3)
 		print('%s Completed!'%self.getName())
 
 	def stop(self):
