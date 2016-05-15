@@ -2,8 +2,10 @@ import requests
 import re
 from datetime import datetime as dt
 import time
-# import sqlite3
-import pymongo as pmg 
+import sqlite3 as sq
+import pandas as pd
+
+# import pymongo as pmg 
 # import multiprocessing as mtp
 # import threading as tr 
 
@@ -35,7 +37,7 @@ class comment_spyder:
 		self.count = 0
 		self.db = db
 		'''
-		When the class is inited, it should fetch the url first, in order to get the cookies needed for fetching data.
+		When the class is initialized, it should fetch the url first, in order to get the cookies needed for fetching data.
 		'''
 		self.cookies = self._get_cookie()
 		print("%s-%s Started!" %(self.code, self._collection_name()))

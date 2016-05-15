@@ -2,18 +2,21 @@ from get_stock_basics import fetch_stock_basics
 import threading
 import time
 from spyder import comment_spyder, follower_spyder
-from pymongo import MongoClient
+import sqlite3 as sq
+# from pymongo import MongoClient
 
 global db, codelist
 
-client = MongoClient()
-db = client['stock_database']
-c1 = db['comment']
-c2 = db['follower']
-c3 = db['count']
-db['comment'].remove()
-db['follower'].remove()
-db['count'].remove()
+
+
+# client = MongoClient()
+# db = client['stock_database']
+# c1 = db['comment']
+# c2 = db['follower']
+# c3 = db['count']
+# db['comment'].remove()
+# db['follower'].remove()
+# db['count'].remove()
 codelist = list(fetch_stock_basics()['code'])[:10]
 listlock = threading.RLock()
 
