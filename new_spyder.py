@@ -12,7 +12,7 @@ conn = sqa.create_engine(r'sqlite:///E:\Chuan\Documents\GitHub\xueqiu_spider\dat
 
 class comment_spyder:
 	'''The class of spyder for comments'''
-	def __init__(self, code, conn):
+	def __init__(self, code, conn, cookies):
 		self._code = code
 		self._headers = {
 			'Host': 'xueqiu.com',
@@ -24,17 +24,14 @@ class comment_spyder:
 			'Connection': 'keep-alive'
 			}
 		self._get_url()
-		self._get_cookies() # get cookies before getting data in order to prevent that the request would be refused;
+		# self._get_cookies() # get cookies before getting data in order to prevent that the request would be refused;
 		# self._count = 0 # the number of data;s
 		self.data = pd.DataFrame()
 		self._conn = conn # SQLAlchemy Engine
 		self._headers["Referer"] = self._url
+		self._cookies = cookies
 
-	def _get_cookies(self):
-		'''Get the cookies for xueqiu.com'''
-		url = 'https://xueqiu.com'
-		r = requests.get(url, headers = self._headers, verify = False)
-		self._cookies = r.cookies
+
 
 	def _get_url(self):
 		'''Get url for the stock'''
@@ -88,8 +85,8 @@ class comment_spyder:
 		print('%s Ended;'%self._code)
 
 class follower_spyder(comment_spyder):
-	def __init__(self, code, conn):
-		super().__init__(code, conn)
+	def __init__(self, code, conn, cookies):
+		super().__init__(code, conn, cookies)
 		self.trading_data = pd.DataFrame()
 
 	def _get_data(self):
@@ -117,8 +114,8 @@ class follower_spyder(comment_spyder):
 				a = record['text']
 				if a[0] not in [i for i in range(10)]:
 					try:
-						price = re.findall(r'当前价[0-9]+\.[0-9]+', a)[0][3:]
-						print(price)
+						price = re.findall(r'当前价 [0-9]+\.[0-9]+', a)
+						price = price[0][3:]
 					except BaseException:
 						price = 0.0
 					record["follow_price"] = str(price)
