@@ -2,7 +2,7 @@ import pandas as pd
 import tushare as ts 
 import sqlalchemy as sqlc
 
-route = 'sqlite:///data/stock.db'
+route = 'sqlite:///data//stock.db'
 engine = sqlc.create_engine(route)
 
 def fetch_stock_basics():
