@@ -45,12 +45,12 @@ class comment_spyder:
 
 	def _get_data(self):
 		'''Get the comments data with the index of page; The range of index should be within 1 and 100;'''
-		for index in range(1, 3):
+		for index in range(1, 100):
 			print(self._code, 'comment', index)
 			time.sleep(0.1)
 			url = 'https://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' + self._url[-8:] + '&hl=0&source=all&sort=time&page=' + str(index)
 			try:
-				text = requests.get(url, headers = self._headers, cookies = self._cookies, verify = False).text
+				text = requests.get(url, headers = self._headers, cookies = self._cookies).text
 			except requests.exceptions.ConnectionError:
 				break
 			record_list = json.loads(text)["list"]
@@ -75,7 +75,7 @@ class comment_spyder:
 		return date[:10] # date is like '2013-07-01 07:39:59'
 	
 	def _save_to_database(self):
-		self.data.to_sql('stock_comments', self._conn, if_exists = 'replace')
+		self.data.to_sql('stock_comments', self._conn, if_exists = 'append')
 
 	def run(self):
 		print('%s Started;'%self._code)
@@ -92,14 +92,14 @@ class follower_spyder(comment_spyder):
 	def _get_data(self):
 		# self._headers["referer"] = self._url
 		# self._cookies = requests.get(self._url, headers = self._headers, cookies = self._cookies, verify = False).cookies
-		for index in range(7, 8):
+		for index in range(1, 100):
 			print(self._code, 'follower', index)
 			time.sleep(0.1)
 			url = 'https://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' + self._url[-8:] + '&hl=0&source=trans&page=' + str(index)
 			try:
-				r = requests.get(url, headers = self._headers, cookies = self._cookies, verify = False)
+				r = requests.get(url, headers = self._headers, cookies = self._cookies)
 				if r.status_code == 301:
-					r = requests.get(url, headers = self._headers, cookies = self._cookies, verify = False)
+					r = requests.get(url, headers = self._headers, cookies = self._cookies)
 				else:
 					text = r.text
 			except requests.exceptions.ConnectionError:
@@ -137,15 +137,14 @@ class follower_spyder(comment_spyder):
 						else:
 							price = 0.0
 							record["sold_price"] = record["bought_price"] = price
-					
 					record["follow_price"] = 0.0
 					record = pd.Series(record)
 					record.name = self._code
 					self.trading_data = self.trading_data.append(record)
 
 	def _save_to_database(self):
-		self.data.to_sql('stock_followers', self._conn, if_exists = 'replace')
-		self.trading_data.to_sql('stock_tradings', self._conn, if_exists= 'replace')
+		self.data.to_sql('stock_followers', self._conn, if_exists = 'append')
+		self.trading_data.to_sql('stock_tradings', self._conn, if_exists= 'append')
 
 	def run(self):
 		self._get_data()
