@@ -92,7 +92,7 @@ class follower_spyder(comment_spyder):
 	def _get_data(self):
 		# self._headers["referer"] = self._url
 		# self._cookies = requests.get(self._url, headers = self._headers, cookies = self._cookies, verify = False).cookies
-		for index in range(1, 2):
+		for index in range(7, 8):
 			print(self._code, 'follower', index)
 			time.sleep(0.1)
 			url = 'https://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' + self._url[-8:] + '&hl=0&source=trans&page=' + str(index)
@@ -112,26 +112,27 @@ class follower_spyder(comment_spyder):
 				record['user'] = str(record['user'])
 				record['retweeted_status'] = str(record['retweeted_status'])
 				a = record['text']
-				if a[0] not in [i for i in range(10)]:
+				if a[0] not in [str(i) for i in range(10)]:
 					try:
-						price = re.findall(r'当前价 [0-9]+\.[0-9]+', a)
-						price = price[0][3:]
+						price = re.findall(r'[0-9]+\.[0-9]+', a)[0]
 					except BaseException:
 						price = 0.0
 					record["follow_price"] = str(price)
 					record["sold_price"] = record["bought_price"] = 0.0
 					record = pd.Series(record)
 					record.name = self._code
-					self.data.append(record)
+					self.data = self.data.append(record)
 				else:
-					price = re.findall(r'￥[0-9]+.[0-9]+买入', a)
+					price = re.findall(r'[0-9]+.[0-9]+买入', a)
+					print(price)
+					print(a)
 					if price != []:
-						record["bought_price"] = price[0][1:-2]
+						record["bought_price"] = price[0][:-2]
 						record["sold_price"] = 0.0
 					else:
-						price = re.findall(r'￥[0-9]+.[0-9]+卖出', a)
+						price = re.findall(r'[0-9]+.[0-9]+卖出', a)
 						if price != []:
-							record["sold_price"] = price[0][1:-2]
+							record["sold_price"] = price[0][:-2]
 							record["bought_price"] = 0.0
 						else:
 							price = 0.0
@@ -140,7 +141,7 @@ class follower_spyder(comment_spyder):
 					record["follow_price"] = 0.0
 					record = pd.Series(record)
 					record.name = self._code
-					self.trading_data.append(record)
+					self.trading_data = self.trading_data.append(record)
 
 	def _save_to_database(self):
 		self.data.to_sql('stock_followers', self._conn, if_exists = 'replace')
