@@ -15,10 +15,11 @@ from main import *
 
 try:
 	thread_list = []
-	for i in range(4):
+	n = 3
+	for i in range(n):
 		thread = spyder()
 		thread_list.append(thread)
-	for i in range(4):
+	for i in range(n):
 		thread_list[i].start()
 except KeyboardInterrupt:
 	for i in thread_list:

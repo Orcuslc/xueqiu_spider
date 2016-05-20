@@ -46,8 +46,8 @@ class comment_spyder:
 	def _get_data(self):
 		'''Get the comments data with the index of page; The range of index should be within 1 and 100;'''
 		for index in range(1, 100):
-			print(self._code, 'comment', index)
-			time.sleep(0.1)
+			# print(self._code, 'comment', index)
+			# time.sleep(0.05)
 			url = 'https://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' + self._url[-8:] + '&hl=0&source=all&sort=time&page=' + str(index)
 			try:
 				text = requests.get(url, headers = self._headers, cookies = self._cookies).text
@@ -93,8 +93,8 @@ class follower_spyder(comment_spyder):
 		# self._headers["referer"] = self._url
 		# self._cookies = requests.get(self._url, headers = self._headers, cookies = self._cookies, verify = False).cookies
 		for index in range(1, 100):
-			print(self._code, 'follower', index)
-			time.sleep(0.1)
+			# print(self._code, 'follower', index)
+			# time.sleep(0.05)
 			url = 'https://xueqiu.com/statuses/search.json?count=10&comment=0&symbol=' + self._url[-8:] + '&hl=0&source=trans&page=' + str(index)
 			try:
 				r = requests.get(url, headers = self._headers, cookies = self._cookies)
@@ -124,8 +124,8 @@ class follower_spyder(comment_spyder):
 					self.data = self.data.append(record)
 				else:
 					price = re.findall(r'[0-9]+.[0-9]+买入', a)
-					print(price)
-					print(a)
+					# print(price)
+					# print(a)
 					if price != []:
 						record["bought_price"] = price[0][:-2]
 						record["sold_price"] = 0.0

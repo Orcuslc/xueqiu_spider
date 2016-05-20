@@ -56,8 +56,8 @@ class spyder(threading.Thread):
 				listlock.acquire()
 				codelist.append(code)
 				listlock.release()
-			time.sleep(3)
-		print('%s Completed!'%self.getName())
+			# time.sleep(1)
+			print('%s Completed!'%self.getName())
 		
 	def stop(self):
 		self.thread_stop = True	
